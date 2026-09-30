@@ -1,0 +1,1 @@
+-- In `12.sql`, find public school districts with both above-average per-pupil expenditures and an above-average percentage of teachers rated exemplary. Return the district name, per-pupil expenditure, and exemplary percentage. Order first by exemplary percentage from greatest to least, then by per-pupil expenditure from greatest to least.

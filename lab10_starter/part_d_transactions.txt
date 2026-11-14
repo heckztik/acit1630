@@ -1,0 +1,137 @@
+
+Connection 1
+
+sqlite> BEGIN;
+sqlite> 
+sqlite> INSERT INTO enrollment (student_id, course_id, term, grade)
+   ...> VALUES ('A23456789', 'ACIT1630', '202630', NULL);
+sqlite> INSERT INTO enrollment (student_id, course_id, term, grade)
+   ...> VALUES ('A23456789', 'ACIT1420', '202630', NULL);
+sqlite> .read check.sql
+┌────────────┬───────────┐
+│ student_id │ course_id │
+├────────────┼───────────┤
+│ A23456789  │ ACIT1420  │
+│ A23456789  │ ACIT1630  │
+└────────────┴───────────┘
+┌───────────┬─────────────────┐
+│ course_id │ available_seats │
+├───────────┼─────────────────┤
+│ ACIT1420  │ 2               │
+│ ACIT1630  │ 1               │
+│ ACIT3910  │ 1               │
+└───────────┴─────────────────┘
+┌───────────────────┐
+│ total_enrollments │
+├───────────────────┤
+│ 14                │
+└───────────────────┘
+sqlite> commit;
+sqlite> begin;
+sqlite> INSERT INTO enrollment (student_id, course_id, term, grade)
+   ...> VALUES ('A45678901', 'ACIT1420', '202630', NULL);
+sqlite> INSERT INTO enrollment (student_id, course_id, term, grade)
+   ...> VALUES ('A23456789', 'ACIT3910', '202630', NULL);
+sqlite> select * from student where first_name = 'Noah';
+┌────────────┬────────────┬───────────┬────────────┐
+│ student_id │ first_name │ last_name │ program_id │
+├────────────┼────────────┼───────────┼────────────┤
+│ A56789012  │ Noah       │ Garcia    │ CST        │
+└────────────┴────────────┴───────────┴────────────┘
+sqlite> INSERT INTO enrollment (student_id, course_id, term, grade)
+   ...> VALUES ('A56789012', 'ACIT3910', '202630', NULL);
+Runtime error: No seats available (19)
+sqlite> .read check.sql
+┌────────────┬───────────┐
+│ student_id │ course_id │
+├────────────┼───────────┤
+│ A23456789  │ ACIT1420  │
+│ A23456789  │ ACIT1630  │
+│ A23456789  │ ACIT3910  │
+│ A45678901  │ ACIT1420  │
+└────────────┴───────────┘
+┌───────────┬─────────────────┐
+│ course_id │ available_seats │
+├───────────┼─────────────────┤
+│ ACIT1420  │ 1               │
+│ ACIT1630  │ 1               │
+│ ACIT3910  │ 0               │
+└───────────┴─────────────────┘
+┌───────────────────┐
+│ total_enrollments │
+├───────────────────┤
+│ 16                │
+└───────────────────┘
+sqlite> rollback;
+sqlite> .read check.sql
+┌────────────┬───────────┐
+│ student_id │ course_id │
+├────────────┼───────────┤
+│ A23456789  │ ACIT1420  │
+│ A23456789  │ ACIT1630  │
+└────────────┴───────────┘
+┌───────────┬─────────────────┐
+│ course_id │ available_seats │
+├───────────┼─────────────────┤
+│ ACIT1420  │ 2               │
+│ ACIT1630  │ 1               │
+│ ACIT3910  │ 1               │
+└───────────┴─────────────────┘
+┌───────────────────┐
+│ total_enrollments │
+├───────────────────┤
+│ 14                │
+└───────────────────┘
+sqlite> 
+
+Connection 2
+
+sqlite> .read check.sql
+┌────────────┬───────────┐
+│ student_id │ course_id │
+├────────────┼───────────┤
+│ A23456789  │ ACIT1420  │
+│ A23456789  │ ACIT1630  │
+└────────────┴───────────┘
+┌───────────┬─────────────────┐
+│ course_id │ available_seats │
+├───────────┼─────────────────┤
+│ ACIT1420  │ 2               │
+│ ACIT1630  │ 1               │
+│ ACIT3910  │ 1               │
+└───────────┴─────────────────┘
+┌───────────────────┐
+│ total_enrollments │
+├───────────────────┤
+│ 14                │
+└───────────────────┘
+sqlite> .read check.sql
+┌────────────┬───────────┐
+│ student_id │ course_id │
+├────────────┼───────────┤
+│ A23456789  │ ACIT1420  │
+│ A23456789  │ ACIT1630  │
+└────────────┴───────────┘
+┌───────────┬─────────────────┐
+│ course_id │ available_seats │
+├───────────┼─────────────────┤
+│ ACIT1420  │ 2               │
+│ ACIT1630  │ 1               │
+│ ACIT3910  │ 1               │
+└───────────┴─────────────────┘
+┌───────────────────┐
+│ total_enrollments │
+├───────────────────┤
+│ 14                │
+└───────────────────┘
+sqlite> INSERT INTO enrollment (student_id, course_id, term, grade)
+   ...> VALUES ('A56789012', 'ACIT3910', '202630', NULL);
+Runtime error: database is locked (5)
+sqlite> 
+
+
+Answers
+
+1. The failed insert did not undo any earlier statements because there was a pending transaction.
+2. The results show that non-commited changes do not appear for other connections.
+3. The results show that only one connection is allowed to have an open transaction at any time.

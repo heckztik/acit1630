@@ -1,5 +1,8 @@
+DROP TRIGGER IF EXISTS reduce_available_seats;
+DROP TRIGGER IF EXISTS prevent_full_enrollment;
+
 CREATE TRIGGER IF NOT EXISTS reduce_available_seats
-AFTER INSERT ON course_registration
+AFTER INSERT ON enrollment
 BEGIN
     UPDATE course_offering
     SET available_seats = available_seats - 1
@@ -7,9 +10,8 @@ BEGIN
 END;
 
 CREATE TRIGGER IF NOT EXISTS prevent_full_enrollment
-BEFORE INSERT ON course_registration
-WHEN OLD.available_seats <= 0
+BEFORE INSERT ON enrollment
+WHEN NEW.course_id IN (SELECT course_id FROM course_offering WHERE available_seats <= 0)
 BEGIN
-    RAISE(ABORT, 'Cannot register for a full course');
+    SELECT RAISE(ABORT, 'No seats available.');
 END;
-

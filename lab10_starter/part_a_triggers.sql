@@ -11,7 +11,7 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS prevent_full_enrollment
 BEFORE INSERT ON enrollment
-WHEN NEW.course_id IN (SELECT course_id FROM course_offering WHERE available_seats <= 0)
+WHEN (SELECT available_seats FROM course_offering WHERE NEW.course_id = course_id AND NEW.term = term) <= 0
 BEGIN
-    SELECT RAISE(ABORT, 'No seats available.');
+    SELECT RAISE(ABORT, 'No seats available');
 END;

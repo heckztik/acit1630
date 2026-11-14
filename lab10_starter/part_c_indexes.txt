@@ -1,0 +1,12 @@
+QUERY PLAN
+`--SCAN course
+
+DROP INDEX IF EXISTS idx_course_description;
+
+CREATE INDEX idx_course_description
+ON course(course_description);
+
+QUERY PLAN
+`--SEARCH course USING INDEX idx_course_description (course_description=?)
+
+- The old plan would loop through course, while the new query plan will loop through course through the course(course_description) column.
